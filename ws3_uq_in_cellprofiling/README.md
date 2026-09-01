@@ -2,18 +2,34 @@
 
 **Lead:** [@hanyangii](https://github.com/hanyangii)
 
-Classification and regression models are designed to always output its prediction to given inputs and tasks calculated from model parameters trained on training data. However, the predictions may not be always correct, especially in the case of unseen data. For example, a classifier trained on Cell Painting features will assign a mechanism of action to any compound you hand it, including compounds whose mechanism it has never seen, and nothing in its output says which calls to trust. 
+Classification and regression models are designed to produce predictions for given inputs and tasks based on parameters learned from training data. However, these predictions may not always be correct, especially for noisy or out-of-distribution (OOD) data. For example, a classifier trained on Cell Painting features can assign a mechanism of action (MoA) to any compound based on the phenotypic changes measured in the features, even if compounds with mechanisms it has never seen. Nothing in its output indicates which calls to trust.
 
+In this workstream, we explore uncertainty quantification to address this problem in Cell Painting and omics data analysis. Depending on their expertise and interests, participants can choose a topic to work on during the hackathon and begin with theoretical study or hands-on practice using machine-learning and omics packages, as needed.
 
+## Essential resources
+
+- [lightning-uq-box](https://lightning-uq-box.readthedocs.io/)  
+       A PyTorch Lightning toolbox for uncertainty-aware deep learning, including the deterministic and Monte Carlo dropout models used in the tutorial.
+- [Lightning](https://lightning.ai/docs/pytorch/stable/)  
+       A high-level framework for organizing, training, and evaluating PyTorch models.
+- [AnnData](https://anndata.readthedocs.io/)  
+       The annotated data matrix used throughout scverse to store feature matrices, observations, and their metadata.
+- [scvi-tools](https://docs.scvi-tools.org/)  
+       A scverse library of deep generative models for single-cell and other omics data analysis.
+
+- [JUMP datasets](https://github.com/jump-cellpainting/datasets) · [lincs-cell-painting](https://github.com/broadinstitute/lincs-cell-painting) · [BBBC021](https://bbbc.broadinstitute.org/BBBC021)
+       Cell painting data sets. Please see the [Test dataset](#test-dataset) section below for details. 
+
+## Getting started
 
 ### Suggested directions
 
-Yunhee has a tutorial notebook that trains an MLP on JUMP profiles with [lightning-uq-box](https://github.com/lightning-uq-box/lightning-uq-box) and compares a deterministic classifier against Monte Carlo dropout. That is the starting point.
+- **Tutorial**) [Tutorial notebook](tutorial.ipynb) provides a practice to train an MLP on JUMP cell painting profiles with [lightning-uq-box](https://github.com/lightning-uq-box/lightning-uq-box) and compares a deterministic classifier against Monte Carlo dropout. 
 
-- WS3A) Which methods are worth the effort? Conformal prediction wraps an already-trained classifier, is post-hoc and cheap, and returns a coverage guarantee. lightning-uq-box needs retraining and gives an epistemic/aleatoric split. Run both on the same model and report what each costs.
-- WS3B) Are the uncertainties any good? Calibration (ECE, Brier, NLL), whether uncertainty ranks errors (accuracy–rejection curves), coverage and set size for conformal methods. This needs splits that are not trivially leaky: replicate wells of the same compound must not straddle train and test, and holding out a whole imaging site is harder and more interesting than holding out wells.
-- WS3C) Does uncertainty rise where the model should struggle? Batch correction is known to fail across many compounds and several microscope types, some phenotypes are too weak to separate from controls, and MoA annotations are incomplete with many compounds hitting more than one target. If uncertainty tracks those cases it is diagnostically useful.
-- WS3D) What should an uncertainty column in `.obs` mean? scverse tools already write per-cell confidence and no two mean the same thing: scArches writes one minus the top kNN vote, CellTypist the maximum of a sigmoid, popV a count of agreeing classifiers, Scyan a log-probability with NaN for rejections. This is the scverse-shaped piece of the workstream.
+- **WS3A**) Which methods are worth the effort? Conformal prediction wraps an already-trained classifier, is post-hoc and cheap, and returns a coverage guarantee. lightning-uq-box needs retraining and gives an epistemic/aleatoric split. Run both on the same model and report what each costs.
+- **WS3B**) Are the uncertainties any good? Calibration (ECE, Brier, NLL), whether uncertainty ranks errors (accuracy–rejection curves), coverage and set size for conformal methods. This needs splits that are not trivially leaky: replicate wells of the same compound must not straddle train and test, and holding out a whole imaging site is harder and more interesting than holding out wells.
+- **WS3C**) Does uncertainty rise where the model should struggle? Batch correction is known to fail across many compounds and several microscope types, some phenotypes are too weak to separate from controls, and MoA annotations are incomplete with many compounds hitting more than one target. If uncertainty tracks those cases it is diagnostically useful.
+- **WS3D**) What should an uncertainty column in `.obs` mean? scverse tools already write per-cell confidence and no two mean the same thing: scArches writes one minus the top kNN vote, CellTypist the maximum of a sigmoid, popV a count of agreeing classifiers, Scyan a log-probability with NaN for rejections. This is the scverse-shaped piece of the workstream.
 
 ### Requirements
 - [x] Starting notebook, and three labelled datasets at three sizes (below)
@@ -88,6 +104,7 @@ The notebook loads the cpg0016 parquet, joins JUMP-MOA labels through `broad_bab
 
 This has barely been attempted on Cell Painting. The one published example is Ha et al. 2024, who calibrated an MLP ensemble with Mondrian conformal prediction to get an explicit "uncertain" class — internal Janssen data, binary task, no code. Nothing in the field reports calibration error or ensemble variance, and the 2026 field review does not mention uncertainty at all. What is used instead answers a different question: anomaly scores against DMSO, or permutation p-values on retrieval (`copairs`). Conformal prediction has a decade of use in cheminformatics and is cheap and post-hoc, which makes it the obvious thing to try alongside the Bayesian methods; `conformalized_single_cell_annotator` already established an AnnData convention for it, `obs["prediction_sets_0.05"]`. A fuller survey with citations is in `tasks/uq_cellpainting_plan.md`.
 
+<!--
 ## Getting Started
 
 - lightning-uq-box 0.3.0 needs Python ≥ 3.12 and pulls torch, lightning, gpytorch and laplace-torch — use the CPU torch index. Add `anndata`, `scanpy`, `polars`, `scikit-learn`, and `mapie` or `torchcp`.
@@ -96,11 +113,11 @@ This has barely been attempted on Cell Painting. The one published example is Ha
 - Whatever survives should end up as a function that takes an AnnData and returns one.
 
 This workstream suits people who do ML and want a well-posed evaluation problem. The dataset section below will save you a day; read it before downloading anything.
+-->
 
-## Relevant Resources
+## Additional resources and references 
 
-- [lightning-uq-box](https://lightning-uq-box.readthedocs.io/) · [MAPIE](https://mapie.readthedocs.io/) · [TorchCP](https://github.com/ml-stat-Sustech/TorchCP)
-- [JUMP datasets](https://github.com/jump-cellpainting/datasets) · [lincs-cell-painting](https://github.com/broadinstitute/lincs-cell-painting) · [BBBC021](https://bbbc.broadinstitute.org/BBBC021)
+- [MAPIE](https://mapie.readthedocs.io/) · [TorchCP](https://github.com/ml-stat-Sustech/TorchCP)
 - [pertpy metadata](https://pertpy.readthedocs.io/en/latest/api/metadata_index.html) · [copairs](https://github.com/cytomining/copairs)
 - [Ha et al. 2024](https://doi.org/10.1038/s41598-024-75401-5) — conformal prediction on Cell Painting
 - [Theunissen et al. 2024](https://doi.org/10.1093/bioinformatics/btae128) — reject options and accuracy–rejection curves
