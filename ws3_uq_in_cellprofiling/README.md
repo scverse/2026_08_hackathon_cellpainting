@@ -1,8 +1,14 @@
-# WS3: Uncertainty quantification for Cell Painting
+# WS3: Uncertainty quantification for Cell Painting and Omics Data
 
 **Lead:** [@hanyangii](https://github.com/hanyangii)
 
-A classifier trained on Cell Painting features will assign a mechanism of action to any compound you hand it, including compounds whose mechanism it has never seen, and nothing in its output says which calls to trust. Yunhee has a tutorial notebook that trains an MLP on JUMP profiles with [lightning-uq-box](https://github.com/lightning-uq-box/lightning-uq-box) and compares a deterministic classifier against Monte Carlo dropout. That is the starting point.
+Classification and regression models are designed to always output its prediction to given inputs and tasks calculated from model parameters trained on training data. However, the predictions may not be always correct, especially in the case of unseen data. For example, a classifier trained on Cell Painting features will assign a mechanism of action to any compound you hand it, including compounds whose mechanism it has never seen, and nothing in its output says which calls to trust. 
+
+
+
+### Suggested directions
+
+Yunhee has a tutorial notebook that trains an MLP on JUMP profiles with [lightning-uq-box](https://github.com/lightning-uq-box/lightning-uq-box) and compares a deterministic classifier against Monte Carlo dropout. That is the starting point.
 
 - WS3A) Which methods are worth the effort? Conformal prediction wraps an already-trained classifier, is post-hoc and cheap, and returns a coverage guarantee. lightning-uq-box needs retraining and gives an epistemic/aleatoric split. Run both on the same model and report what each costs.
 - WS3B) Are the uncertainties any good? Calibration (ECE, Brier, NLL), whether uncertainty ranks errors (accuracy–rejection curves), coverage and set size for conformal methods. This needs splits that are not trivially leaky: replicate wells of the same compound must not straddle train and test, and holding out a whole imaging site is harder and more interesting than holding out wells.
