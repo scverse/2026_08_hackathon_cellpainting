@@ -1,0 +1,20 @@
+[project]
+name = "scverse-cellpainting-uncertainty"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "anndata>=0.13.1",
+    "broad-babel>=0.1.31",
+    "curvlinops-for-pytorch<3",
+    "ipykernel>=7.3.0",
+    "laplace-torch==0.2.2.2",
+    "lightning-uq-box>=0.2.0",
+    "nbconvert>=7.17.1",
+    "polars>=1.42.1",
+    "pyarrow>=25.0.0",
+    "requests>=2.34.2",
+    "scikit-image>=0.26.0",
+    "seaborn>=0.13.2",
+]
