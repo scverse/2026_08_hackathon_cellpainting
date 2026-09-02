@@ -22,6 +22,35 @@ In this workstream, we explore uncertainty quantification to address this proble
 
 ## Getting started
 
+### MDC Cloud instance 
+
+The baseline `micromamba` environment with the essential resources installed is provided:
+```
+y.jeong@scversegpu-2:~$ eval "$(micromamba shell hook --shell bash)"
+y.jeong@scversegpu-2:~$ micromamba activate
+(base) y.jeong@scversegpu-2:~$ micromamba env list
+  Name             Active  Path                                
+─────────────────────────────────────────────────────────────────
+  base             *       /opt/micromamba                     
+  uncertainty_env          /opt/micromamba/envs/uncertainty_env
+(base) y.jeong@scversegpu-2:~$ micromamba activate
+```
+One NIDIA RTX PRO 600 GPU is also provided:
+```
+(base) y.jeong@scversegpu-2:~$ nvidia-smi
+Wed Sep  2 11:56:41 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 610.43.02              KMD Version: 610.43.02     CUDA UMD Version: 13.3     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA RTX PRO 6000 Blac...    Off |   00000000:00:06.0 Off |                    0 |
+| N/A   33C    P8             31W /  600W |       0MiB /  97887MiB |      0%      Default |
+|                                         |                        |             Disabled |
+```
+
 ### Suggested directions
 
 - **Tutorial**) [Tutorial notebook](tutorial.ipynb) provides a practice to train an MLP on JUMP cell painting profiles with [lightning-uq-box](https://github.com/lightning-uq-box/lightning-uq-box) and compares a deterministic classifier against Monte Carlo dropout. 
