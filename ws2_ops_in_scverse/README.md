@@ -59,9 +59,18 @@ aws s3 cp --no-sign-request \
 
 Sequencing images live under `10X_c{n}-SBS-{n}/`, phenotype under `20X_CP_{plate}/`. The dataset is 56 TB, so pull tiles, never a plate.
 
-### Option D — CZI OPS data portal
+### Option D — CZI OPS data portal (Leonetti OPS atlas)
 
-Not usable yet. `chanzuckerberg/ops-schema` scopes raw acquisition images out, and the CZ Biohub OPS Explorer is alpha with no download surfaced (checked 2026-08-28).
+Usable now, with a caveat. The public bucket `s3://ops-explorer-public` carries 88 screens of the Leonetti OPS atlas as OME-NGFF 0.5 HCS plates, each a stitched well with 11 to 12 segmentation masks and a per-cell parquet table. Scripts, download instructions and a schema write-up are in [`biohub_ops_portal/`](biohub_ops_portal).
+
+```bash
+cd biohub_ops_portal
+uv sync --extra tables
+uv run fetch_ops_artifacts.py --out data          # 44 MB of tables and metadata
+uv run fetch_ops_subset.py --help                 # windowed pixels + masks, ~100 MB per window
+```
+
+The caveat matters for WS2A: there are no sequencing-cycle images. `chanzuckerberg/ops-schema` scopes raw acquisition out, so the store holds the phenotype round plus in-situ sequencing results already reduced to overlays and per-cell barcode calls. This dataset will not answer how cycles should be represented. What it does give you is a real OME-NGFF plate with masks and a linked table, at screen scale (650 GB per store, 3.3 TB per collection), which is the WS2B question.
 
 ## Reference: how cycles are stored today
 
