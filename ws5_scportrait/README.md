@@ -4,7 +4,7 @@
 
 [scPortrait](https://github.com/MannLabs/scPortrait) takes raw microscopy to a per-cell AnnData: `.h5sc` holds a `(cells, channels, height, width)` tensor in `obsm`. Input images and masks sit in an intermediate `SpatialData` store.
 
-- WS5A Agentic AI workflows
+- WS5A Agentic AI workflows ⛳️
 	- We will expose the scPortrait workflow to AI agents, enabling end-to-end single-cell image dataset generation from raw microscopy data. Because scPortrait already abstracts this into `stitching`, `segmentation` and `extraction` steps it is an ideal platform to build agentic workflows.
 - WS5B Interactive visualization
 	- scPortrait defines the AnnData-based `.h5sc` single-cell image storage format. Based on this, we will build a lightweight visualizer of single-cell images on top of image embeddings. FACS-data-like gating will allow visual exploration of datasets.
