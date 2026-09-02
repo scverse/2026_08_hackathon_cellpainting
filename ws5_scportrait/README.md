@@ -2,25 +2,26 @@
 
 **Lead:** [@nik-as](https://github.com/nik-as)
 
-[scPortrait](https://github.com/MannLabs/scPortrait) already takes raw microscopy to a per-cell AnnData: `.h5sc` holds a `(cells, channels, height, width)` tensor in `obsm`, images and masks sit in a `SpatialData` store. What it cannot do is generate morphology, show you the cell behind a point in an embedding, or be driven by anything except hand-written Python.
+[scPortrait](https://github.com/MannLabs/scPortrait) takes raw microscopy to a per-cell AnnData: `.h5sc` holds a `(cells, channels, height, width)` tensor in `obsm`. Input images and masks sit in an intermediate `SpatialData` store.
 
-- WS5A) Can scPortrait generate morphology rather than only describe it? Pretrained perturbation-conditioned image models (MorphoDiff, CellFlux, IMPA) and embedding models (OpenPhenom, scDINO) all read their own folder-of-images format and none is AnnData-native. Running one against `.h5sc` directly is the question; `ConvNeXtFeaturizer` is a ~110-line template for wiring a backbone in.
-- WS5B) What does interactive exploration look like? scPortrait has a static matplotlib crop gallery (`pl.cell_grid`) and a `Project.view_sdata()` hook into napari-spatialdata. Clicking a point in an embedding and seeing that cell's crop is the missing move, as a napari widget or in the browser.
-- WS5C) Can an agent drive an image-processing workflow? scPortrait is a Python API plus a YAML config keyed by class name, with no CLI. `napari-mcp` exposes a viewer over 16 MCP tools, and MCP servers exist for AnnData and scanpy but not SpatialData or scPortrait.
+- WS5A Agentic AI workflows ⛳️
+	- We will expose the scPortrait workflow to AI agents, enabling end-to-end single-cell image dataset generation from raw microscopy data. Because scPortrait already abstracts this into `stitching`, `segmentation` and `extraction` steps it is an ideal platform to build agentic workflows.
+- WS5B Interactive visualization
+	- scPortrait defines the AnnData-based `.h5sc` single-cell image storage format. Based on this, we will build a lightweight visualizer of single-cell images on top of image embeddings. FACS-data-like gating will allow visual exploration of datasets.
+- WS5C Additional segmentation workflows
+	- Implement recent segmentation methods such as segment-anything for microscopy [(SAM)](https://www.nature.com/articles/s41592-024-02580-4)
 
 ### Requirements
 - [x] Ready-made data ships with the package
 - [x] OpenPhenom, CellFlux and MorphoDiff publish weights
-- [ ] **Pick one of A/B/C on Wednesday morning.** Three directions is one team's worth of scope only if two are dropped.
+- [x] **Pick one of A/B/C on Wednesday morning.** Three directions is one team's worth of scope only if two are dropped.
 - [ ] Decide what "the agent's choices were good" means before building WS5C
 
 ### Deliverable
-- One of: a pretrained backbone running against `.h5sc`, a crop-on-click widget, or an MCP surface over a scPortrait project.
+- A raw image to `.h5sc` pipeline running on CODEX or Claude Code
 
 ### Stretch goal
-- Any of the well-specified open issues below, shipped as PRs.
-
-⚠️ scPortrait is Linux/macOS only (Python ≥ 3.11). Training a generative model from scratch is not realistic in three days; run a pretrained one.
+- Include stitching or featurization
 
 ## Getting Started
 
@@ -32,6 +33,7 @@ pip install scportrait          # Apache-2.0, Python >=3.11, Linux/macOS
 import scportrait
 scportrait.data.autophagosome_h5sc()   # ready-made .h5sc pair, autophagy stimulated/unstimulated
 scportrait.data.dataset_1()            # ~44 MB raw images, the walkthrough dataset
+scportrait.data.dataset_stitching_example() # A raw image dataset
 ```
 
 - Work through [A Walk Through The scPortrait Ecosystem](https://mannlabs.github.io/scPortrait/pages/tutorials.html) and the deep-learning tutorial, which builds a PyTorch dataloader straight off a `.h5sc`.
@@ -39,13 +41,11 @@ scportrait.data.dataset_1()            # ~44 MB raw images, the walkthrough data
 - `ConvNeXtFeaturizer` (`pipeline/featurization.py`) is a ~110-line template for wiring a new backbone in, and the cleanest thing to copy for WS5A.
 - Everything downstream is an AnnData, so scanpy, pertpy and the rest of scverse apply once you have features.
 
-This workstream suits people comfortable with PyTorch, napari or MCP tooling. Not an entry point for anyone new to deep learning.
-
 ## Reference
 
 ### Where scPortrait is today
 
-v1.8.0 on PyPI (May 2026), 110 stars, Apache-2.0, preprint [Mädler, Schmacke et al. 2025](https://doi.org/10.1101/2025.09.22.677590), successor to SPARCSpy. Segmentation is Cellpose-only (pinned `<4`; a `cpsam` adapter is open as PR #406). Featurizers: `CellFeaturizer` (intensity and shape statistics), `MLClusterClassifier` and `EnsembleClassifier` (inference from Lightning checkpoints), `ConvNeXtFeaturizer` (2048-d HuggingFace ConvNeXt embeddings). In-tree models include VGG variants, a convolutional autoencoder and `VAEBase`; one pretrained checkpoint ships. No self-supervised backbone, no CLI, and no mention of generative models, agents or foundation models anywhere in the repo.
+v1.8.0 on PyPI (May 2026), 110 stars, Apache-2.0, preprint [Mädler, Schmacke et al. 2025](https://doi.org/10.1101/2025.09.22.677590). Segmentation uses Cellpose (pinned `<4`; a `cpsam` adapter is open as PR #406). Featurizers: `CellFeaturizer` (intensity and shape statistics), `MLClusterClassifier` and `EnsembleClassifier` (inference from Lightning checkpoints), `ConvNeXtFeaturizer` (2048-d HuggingFace ConvNeXt embeddings). In-tree models include VGG variants, a convolutional autoencoder and `VAEBase`; one pretrained checkpoint ships.
 
 ### What exists elsewhere, and how usable it is
 
@@ -60,10 +60,6 @@ v1.8.0 on PyPI (May 2026), 110 stars, Apache-2.0, preprint [Mädler, Schmacke et
 | WS5C | [bia-bob](https://github.com/haesleinhuepf/bia-bob) · [anndata-mcp](https://github.com/biocontext-ai/anndata-mcp) · [scmcphub](https://github.com/scmcphub) | mature Jupyter copilot with local Ollama; MCP servers covering parts of scverse |
 
 Read before claiming an agent works: [MicroVQA](https://jmhb0.github.io/microvqa) (expert microscopy VQA, best models ~53 %) and [arXiv:2608.05266](https://arxiv.org/abs/2608.05266), which finds agent performance on microscopy benchmarks does not generalise to unseen tasks.
-
-### If you would rather ship something small
-
-The repo has well-specified open issues: zstd compression for `.h5sc` (#345, benchmarks already posted — 38 % faster reads, 28 % smaller files), exposing the hardcoded chunking (#378), validation for `write_h5sc` (#397), and replacing `eval()` in the config path with an explicit registry (discussion #393, with a working exploit and an agreed fix).
 
 ## Relevant Resources
 
