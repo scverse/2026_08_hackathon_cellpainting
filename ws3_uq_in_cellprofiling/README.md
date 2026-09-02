@@ -33,7 +33,8 @@ y.jeong@scversegpu-2:~$ micromamba activate
 ─────────────────────────────────────────────────────────────────
   base             *       /opt/micromamba                     
   uncertainty_env          /opt/micromamba/envs/uncertainty_env
-(base) y.jeong@scversegpu-2:~$ micromamba activate
+(base) y.jeong@scversegpu-2:~$ micromamba activate uncertainty_env
+(uncertainty_env) y.jeong@scversegpu-2:~$
 ```
 One NVIDIA RTX PRO 6000 GPU is also provided:
 ```
