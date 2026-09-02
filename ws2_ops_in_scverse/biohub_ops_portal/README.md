@@ -26,7 +26,8 @@ Both scripts carry [PEP 723](https://peps.python.org/pep-0723/) inline dependenc
 | Tier | Command | Size | What you get |
 | --- | --- | --- | --- |
 | Tables and metadata | `fetch_ops_artifacts.py` | 44 MB | YAML metadata, `perturbation_library.csv`, `feature_definitions.csv`, `cell_data.parquet` (831,587 cells), `aggregated_data.h5ad` (1052 genes), plus the image store's `zarr.json` tree |
-| Pixels, one window | `fetch_ops_subset.py --size 2048,2048 --levels 0,1` | 100 MB | 6 channels of real pixels, 828 nuclei and 859 cell masks in that window |
+| Pixels, one window | `fetch_ops_subset.py --size 2048,2048 --levels 0,1 --labels nuclear_seg,cell_seg` | 100 MB | 6 channels of real pixels, 828 nuclei and 859 cell masks in that window |
+| Pixels, all masks | `fetch_ops_subset.py --size 1024,1024 --levels 0 --labels all` | 23 MB | 6 channels plus all 15 groups under `labels/`, from `nuclear_seg` to the ISS overlays |
 | Pixels, whole well | `fetch_ops_subset.py --size 104650,105144 --levels 4 --labels none` | 630 MB | The full stitched well at 16x downsampling, 5.2 um/px, 6 channels. Add about 8 MB per label group |
 | Everything | `ops-data download collection <id>` | 3.3 TB | Do not |
 
@@ -61,13 +62,15 @@ Copies a spatial window of one well image, plus its label masks, into a self-con
 --origin Y,X                Window origin in level-0 pixels        [default: 0,0]
 --size H,W                  Window size in level-0 pixels          [default: 4096,4096]
 --levels TEXT               Comma-separated levels, or 'all'       [default: 0]
---labels TEXT               Comma-separated names, 'all', 'none'   [default: all]
+--labels TEXT               Names, 'all', 'declared', or 'none'    [default: all]
 --out PATH                  Output directory                       [required]
 --anon / --signed           Anonymous S3 access                    [default: anon]
 --dry-run
 ```
 
-`--labels all` takes the groups listed in `ome.labels`, which is the 11 to 12 segmentation masks. It skips `iss_gene_image`, `iss_guide_image` and `grid_overlay`, which sit under `labels/` but are RGBA viewer overlays rather than label images.
+`--labels all` takes every group under `labels/`: the 11 to 12 integer segmentation masks plus the three RGBA overlays (`iss_gene_image`, `iss_guide_image`, `grid_overlay`), which are real data but are not listed in `ome.labels`. Use `--labels declared` for the `ome.labels` set alone, or name groups explicitly. The output's `ome.labels` lists only the declared groups it copied, so the overlays travel alongside without making the store claim they are label images.
+
+The overlays need two accommodations, both handled in the script. They are `(Y, X, 4)` uint8 rather than `(T, C, Z, Y, X)`, so the window is applied to axes 0 and 1. And their level-0 arrays declare five `dimension_names` for three dimensions, which zarr-python rejects on open, so a store wrapper drops the mismatched names on read and the script reports how many arrays it repaired.
 
 `--origin` and `--size` are always in level-0 pixels, whichever levels you ask for. The script divides them down per level, so one window definition gives you a consistent region across the pyramid. The output keeps the plate and well groups with a single well and field, filters `ome.multiscales` to the levels fetched, and appends a `translation` transform recording where the crop came from.
 
@@ -93,7 +96,7 @@ atlas = ad.read_h5ad("data/atlas/aggregated_data.h5ad")   # 1052 x 66, obsm X_um
 
 Three things will bite a reader of this data. All are properties of the published stores, not of these scripts.
 
-1. Label pyramid levels 1 and up have no `dimension_names`, so `ome-zarr-models` rejects the label groups and, through them, the parent image group. Level 0 is fine. Affects all 88 stores. Work around it by reading label level 0, or by writing `dimension_names` yourself after download.
+1. Label pyramid levels 1 and up have no `dimension_names`, so `ome-zarr-models` rejects the label groups and, through them, the parent image group. Level 0 is fine. Affects all 88 stores. Work around it by reading label level 0, or by writing `dimension_names` yourself after download. Separately, the three RGBA overlay arrays declare five dimension names for three dimensions, which stops zarr-python opening them at all; `fetch_ops_subset.py` repairs that on read.
 2. `cell_data.parquet` uses 32 retired HGNC symbols (`AARS`, `ADSS`, `ASNA1`, `CARS`, `GARS`, `H2AFX`, and others) where `perturbation_library.csv` uses current ones (`AARS1`, `ADSS2`, `GET3`). A naive join drops those cells. Same 32 in every dataset.
 3. There is no `collection_metadata.yaml`, and the aggregations sit under a `datasets/` container rather than at the submission root, so the tree does not match the standard's expected layout. See [SCHEMA.md](SCHEMA.md).
 

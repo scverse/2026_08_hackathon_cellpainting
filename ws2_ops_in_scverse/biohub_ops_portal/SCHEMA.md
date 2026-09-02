@@ -104,7 +104,9 @@ Biohub_OPS0001.zarr/
 
 Axes are `(T, C, Z, Y, X)` with T and Z of length 1. The five levels are 2x downsamples: 0.325, 0.65, 1.3, 2.6 and 5.2 um/px.
 
-Three directories under `labels/` are deliberately not in `ome.labels`: `iss_gene_image` and `iss_guide_image` are RGBA overlays of the in-situ sequencing calls, and `grid_overlay` marks the pre-stitch tile grid. They carry `custom_metadata` with `is_ome_label: false`. The standard says readers ignore anything not listed, so treat them as viewer extras.
+Three directories under `labels/` are deliberately not in `ome.labels`: `iss_gene_image` and `iss_guide_image` are RGBA overlays of the in-situ sequencing calls, and `grid_overlay` marks the pre-stitch tile grid. They carry `custom_metadata` with `is_ome_label: false`. The standard says readers ignore anything not listed, so treat them as viewer extras. They are worth having anyway: in a 1024² window at level 0 the guide overlay covers 6.7% of pixels and the gene overlay 4.6%.
+
+The overlays are shaped `(Y, X, 4)` uint8, sharded at 32768² with 1024² inner chunks, and their level-0 arrays declare five `dimension_names` for three dimensions. That last part violates the Zarr v3 spec and makes zarr-python refuse to open them, so any reader needs to repair the metadata first. `fetch_ops_subset.py` does this with a store wrapper.
 
 Each segmentation group carries a `segmentation_metadata` block alongside `ome.multiscales`, with `label_name`, `annotation_type`, `is_ome_label`, the `source_channel` it was computed from, a `biological_annotation`, the segmentation `method` and `version`, and cell counts.
 
