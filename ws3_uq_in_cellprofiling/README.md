@@ -35,7 +35,7 @@ y.jeong@scversegpu-2:~$ micromamba activate
   uncertainty_env          /opt/micromamba/envs/uncertainty_env
 (base) y.jeong@scversegpu-2:~$ micromamba activate
 ```
-One NIDIA RTX PRO 600 GPU is also provided:
+One NVIDIA RTX PRO 6000 GPU is also provided:
 ```
 (base) y.jeong@scversegpu-2:~$ nvidia-smi
 Wed Sep  2 11:56:41 2026       
