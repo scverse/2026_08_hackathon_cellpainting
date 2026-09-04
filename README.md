@@ -35,7 +35,7 @@ Teams create their own repository on Wednesday and add it here.
 | Workstream | Team repository |
 |---|---|
 | WS1 | |
-| WS2 | |
+| WS2 | https://github.com/scverse/sp-ops |
 | WS3 | |
 | WS4 | [Arkkienkeli/hackathon_crossmodal_stream](https://github.com/Arkkienkeli/hackathon_crossmodal_stream) |
 | WS5 | |
